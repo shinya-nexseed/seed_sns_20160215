@@ -1,0 +1,12 @@
+
+
+/*必須文字のスタイル*/
+.required {
+  color: red;
+  font-size: 14px;
+}
+
+/*エラー文字のスタイル*/
+.error {
+  color: red;
+}
