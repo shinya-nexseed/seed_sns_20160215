@@ -56,6 +56,8 @@
         // もしエラーが何もなかったら($errorが空だったら)
         if (empty($error)) {
             // 画像をサーバーへアップロードする処理
+            // 単に登録する画像の名前の文字列を他と絶対にかぶらない形で
+            // 変数に代入する
             $image = date('YmdHis') . $_FILES['image']['name'];
             // date()関数とは、指定したフォーマットで現在の日時を返す
             // echo $image;
@@ -68,6 +70,7 @@
 
             // セッションのjoinに$_POSTの情報を入れる
             $_SESSION['join'] = $_POST;
+            $_SESSION['join']['image'] = $image;
 
             // $_SESSIONとは
             // 任意の情報をブラウザが閉じられるまで保持する場所を
@@ -80,7 +83,21 @@
 
     }
 
+    // 書き直し
+    if (isset($_REQUEST['action'])) {
+        // $_REQUESTとは、$_GET,$_POSTなどを保持するスーパーグローバル変数
+        // $_REQUEST['action']が存在すればif文処理する
 
+        if ($_REQUEST['action'] == 'rewrite') {
+            // $_REQUEST['action']の値が'rewrite'だったら処理する
+
+            $_POST = $_SESSION['join'];
+            // $_POSTに$_SESSIONの値を代入してフォームに表示
+
+            $error['rewrite'] = true;
+            // 画像を再度登録するように促すエラー用
+        }
+    }
 
 ?>
 
@@ -157,7 +174,14 @@
       </dd>
 
       <dt>写真 <span class="required">必須</span></dt>
-      <dd><input type="file" name="image"></dd>
+      <dd>
+        <input type="file" name="image">
+        <?php if(!empty($error['image'])): ?>
+            <?php if($error['image'] == 'type'): ?>
+                <p class="error">写真は「jpg」または「png」の形式で指定してください。</p>
+            <?php endif; ?>
+        <?php endif; ?>
+      </dd>
 
     </dl>
     <div><input type="submit" value="入力内容を確認する"></div>
