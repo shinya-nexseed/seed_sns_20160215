@@ -2,6 +2,7 @@
     // 各ページセッションを使用したい場合は
     // session_start()が必要
     session_start();
+    require('../dbconnect.php');
 
     // サニタイズのテスト
     // echo '<h1>ほげほげ</h1>'; // ← デカ文字で表示されます。
@@ -19,6 +20,12 @@
             $error['nick_name'] = 'blank';
             // $error配列のnick_nameキーにblankという値を代入
         }
+
+        // 1. 正規表現
+        // hogehoge@fuga.hogu
+        // 2. HTML5のinputタグtype="email"を使用する
+        // 自動的にinputタグの内容を正規表現を使ってバリデーションしてくれる
+
 
         if ($_POST['email'] == '') {
             $error['email'] = 'blank';
@@ -50,6 +57,18 @@
             // typeというエラーを出す
             if ($ext != 'jpg' && $ext != 'png') {
                 $error['image'] = 'type';
+            }
+        }
+
+        // 重複アカウントのチェック
+        if (empty($error)) {
+            $sql = sprintf('SELECT COUNT(*) AS cnt FROM members WHERE email="%s"',
+                mysqli_real_escape_string($db,$_POST['email'])
+            );
+            $record = mysqli_query($db,$sql) or die(mysqli_error($db));
+            $table = mysqli_fetch_assoc($record);
+            if ($table['cnt'] > 0) {
+                $error['email'] = 'duplicate';
             }
         }
 
@@ -101,6 +120,8 @@
 
 ?>
 
+<!-- HTML5を使用する宣言 -->
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="utf-8">
@@ -144,14 +165,17 @@
       <dt>メールアドレス <span class="required">必須</span></dt>
       <dd>
         <?php if(!empty($_POST['email'])): ?>
-            <input type="text" name="email" value="<?php echo htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="email" name="email" value="<?php echo htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8'); ?>">
         <?php else: ?>
-            <input type="text" name="email" value="">
+            <input type="email" name="email" value="">
         <?php endif; ?>
 
         <?php if(!empty($error['email'])): ?>
             <?php if($error['email'] == 'blank'): ?>
                 <p class="error">メールアドレスを入力してください。</p>
+            <?php endif; ?>
+            <?php if ($error["email"] == 'duplicate'): ?>
+                <p class="error">* 指定されたメールアドレスはすでに登録されています。</p>
             <?php endif; ?>
         <?php endif; ?>
       </dd>
