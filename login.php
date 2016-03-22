@@ -4,8 +4,14 @@
 
     session_start();
 
+    // setcookie('email', $_POST['email'], time()+60*60*24*14);
+    // が14日以内に一度でも処理されていれば、
+    // このif文を処理
     if (isset($_COOKIE['email'])) {
         if ($_COOKIE['email'] != '') {
+
+            // $_POSTに$_COOKIEの値を渡している
+            // フォームから値の送信処理を擬似的につくっている
             $_POST['email'] = $_COOKIE['email'];
             $_POST['password'] = $_COOKIE['password'];
             $_POST['save'] = 'on';
@@ -45,14 +51,14 @@
                 // ログイン成功
                 
                 // ユーザーのidをセッションに保存
-                $table = array('member_id' => '1',
-                               'nick_name' => 'Seed',
-                               'email' => 'seed@kun.net',
-                               'password' => 'hogehoge',
-                               'picture_path' => 'image.jpg',
-                               'created' => '日付',
-                               'modified' => '日付'
-                               );
+                // $table = array('member_id' => '1',
+                //                'nick_name' => 'Seed',
+                //                'email' => 'seed@kun.net',
+                //                'password' => 'hogehoge',
+                //                'picture_path' => 'image.jpg',
+                //                'created' => '日付',
+                //                'modified' => '日付'
+                //                );
 
                 $_SESSION['id'] = $table['member_id'];
                 // 次のページ以降で絶対にかぶらないmember_idを元に
@@ -67,8 +73,16 @@
                 $_SESSION['time'] = time();
 
                 // ログイン情報を記録する
+                // フォームのチェックボックスにチェックが
+                // ついている場合に処理
                 if ($_POST['save'] == 'on') {
+                    
+                    // 入力されたメールアドレス情報
+                    // time()+60*60*24*14
+                    // 現在時刻+60秒×60分×24時間×14日間
+
                     setcookie('email', $_POST['email'], time()+60*60*24*14);
+
                     setcookie('password', $_POST['password'], time()+60*60*24*14);
                 }
 
@@ -148,5 +162,10 @@
   </form>
 </body>
 </html>
+
+
+
+
+
 
 

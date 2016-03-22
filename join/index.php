@@ -61,12 +61,21 @@
         }
 
         // 重複アカウントのチェック
+        // もしバリデーションをかけた時にエラーがなければ処理
         if (empty($error)) {
-            $sql = sprintf('SELECT COUNT(*) AS cnt FROM members WHERE email="%s"',
+            $sql = sprintf(
+                'SELECT COUNT(*) AS cnt FROM members WHERE email="%s"',
                 mysqli_real_escape_string($db,$_POST['email'])
             );
+            // ユーザーがメールアドレスの欄に入力した値でmembersテーブルに検索をかけ、
+            // データがヒットすればその件数を返す
+
             $record = mysqli_query($db,$sql) or die(mysqli_error($db));
             $table = mysqli_fetch_assoc($record);
+
+            // データがヒットして件数が0以上 = すでに登録されているメールアドレス
+            // もし$table['cnt']の値が0以上であれば重複メールアドレスとして
+            // $error['email']にduplicate (重複) のエラーを代入
             if ($table['cnt'] > 0) {
                 $error['email'] = 'duplicate';
             }

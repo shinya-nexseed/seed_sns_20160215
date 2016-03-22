@@ -1,30 +1,34 @@
 <?php
     session_start();
     require('dbconnect.php');
+    require('functions.php');
 
+    // $_SESSIONに必要な値が入っていればログインしているので、
+    // if文を処理
     if (isset($_SESSION['id']) && $_SESSION['time'] + 3600 > time() ) {
-        // ログインしている
+
+
         $_SESSION['time'] = time();
 
-        $sql = sprintf('SELECT * FROM members WHERE id=%d',
+        $sql = sprintf('SELECT * FROM members WHERE member_id=%d',
             mysqli_real_escape_string($db, $_SESSION['id'])
         );
 
         $record = mysqli_query($db, $sql) or die(mysqli_error($db));
+
+        // ログインしているのユーザーのデータ
         $member = mysqli_fetch_assoc($record);
     } else {
-        // ログインしていない
         header('Location: login.php');
         exit();
     }
 
     // 投稿を記録する
     if (!empty($_POST)) {
-        if ($_POST['message'] != '') {
-            $sql = sprintf('INSERT INTO posts SET member_id=%d, message="%s", reply_post_id=%d, created=NOW()',
-                mysqli_real_escape_string($db, $member['id']),
-                mysqli_real_escape_string($db, $_POST['message']),
-                mysqli_real_escape_string($db, $_POST['reply_post_id'])
+        if ($_POST['tweet'] != '') {
+            $sql = sprintf('INSERT INTO tweets SET member_id=%d, tweet="%s", created=NOW()',
+                mysqli_real_escape_string($db, $member['member_id']),
+                mysqli_real_escape_string($db, $_POST['tweet'])
             );
 
             mysqli_query($db,$sql) or die(mysqli_error($db));
@@ -35,9 +39,31 @@
     }
 
     // 投稿を取得する
-    $sql = sprintf('SELECT m.nick_name, m.picture, p.* FROM members m, posts p WHERE m.id=p.member_id ORDER BY p.created DESC');
+    // $sql = sprintf('SELECT m.nick_name, m.picture_path, p.* FROM members m, tweets p WHERE m.member_id=p.member_id ORDER BY p.created DESC');
 
-    $posts = mysqli_query($db,$sql) or die(mysqli_error($db));
+    // membersテーブルからmember_idが1のレコードを取得する
+    // SELECT * FROM members WHERE member_id=1
+    
+    // membersテーブルに別名「m」をつけている
+    // SELECT * FROM members m WHERE m.member_id=1
+
+    // テーブルを複数個指定し、データを繋げて一気に取得
+    // SELECT * FROM members, tweets WHERE members.member_id=1 ORDER BY tweets.created DESC
+
+    // membersテーブルのmember_idと,
+    // tweetsテーブルのmember_idが等しければ
+    // データを取得する (存在するtweetsデータ全件取得)
+    $sql = 'SELECT m.nick_name, m.picture_path, t.*
+            FROM members m, tweets t 
+            WHERE m.member_id=t.member_id
+            ORDER BY t.created DESC';
+
+
+    $tweets = mysqli_query($db,$sql) or die(mysqli_error($db));
+
+    // tweets時点ではまだobject
+    // 実際に使用するにはmysqli_fetch_assoc()関数で配列に置き換える
+    special_var_dump($tweets);
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +83,7 @@
         <dl>
           <dt><?php echo htmlspecialchars($member['nick_name']); ?>メッセージをどうぞ</dt>
           <dd>
-            <textarea name="message" cols="50" rows="5"></textarea>
+            <textarea name="tweet" cols="50" rows="5"></textarea>
           </dd>
         </dl>
         <div>
@@ -65,14 +91,14 @@
         </div>
       </form>
 
-      <?php while ($post = mysqli_fetch_assoc($posts)): ?>
+      <?php while ($tweet = mysqli_fetch_assoc($tweets)): ?>
           <div class="msg">
-            <img src="member_picture/<?php echo htmlspecialchars($post['picture'], ENT_QUOTES, 'UTF-8'); ?>" width="48" height="48" alt="<?php echo htmlspecialchars($post['nick_name'], ENT_QUOTES, 'UTF-8'); ?>">
+            <img src="member_picture/<?php echo htmlspecialchars($tweet['picture_path'], ENT_QUOTES, 'UTF-8'); ?>" width="48" height="48" alt="<?php echo htmlspecialchars($tweet['nick_name'], ENT_QUOTES, 'UTF-8'); ?>">
             <p>
-              <?php echo htmlspecialchars($post['message'], ENT_QUOTES, 'UTF-8'); ?><span class="name"> (<?php echo htmlspecialchars($post['nick_name'], ENT_QUOTES, 'UTF-8'); ?>) </span>
+              <?php echo htmlspecialchars($tweet['tweet'], ENT_QUOTES, 'UTF-8'); ?><span class="name"> (<?php echo htmlspecialchars($tweet['nick_name'], ENT_QUOTES, 'UTF-8'); ?>) </span>
             </p>
             <p class="day">
-              <?php echo htmlspecialchars($post['created'], ENT_QUOTES, 'UTF-8'); ?>
+              <?php echo htmlspecialchars($tweet['created'], ENT_QUOTES, 'UTF-8'); ?>
             </p>
           </div>
       <?php endwhile; ?>
