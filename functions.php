@@ -44,6 +44,12 @@
     // special_var_dump($ary);
     // special_var_dump($_SESSION);
 
+
+    // htmlspecialcharsのショートカット
+    function h($value) {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
 ?>
 
 
