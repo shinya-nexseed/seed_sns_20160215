@@ -122,7 +122,7 @@
         
         <!-- メールアドレス用inputタグの表示分岐 -->
         <?php if(!empty($_POST['email'])): ?>
-            <input type="text" name="email" value="<?php echo htmlspecialchars($_POST['email']); ?>">
+            <input type="text" name="email" value="<?php echo h($_POST['email']); ?>">
         <?php else: ?>
             <input type="text" name="email" value="">
         <?php endif; ?>
@@ -142,7 +142,7 @@
       <dt>パスワード</dt>
       <dd>
         <?php if(!empty($_POST['password'])): ?>
-            <input type="password" name="password" value="<?php echo htmlspecialchars($_POST['password']); ?>">
+            <input type="password" name="password" value="<?php echo h($_POST['password']); ?>">
         <?php else: ?>
             <input type="password" name="password" value="">
         <?php endif; ?>

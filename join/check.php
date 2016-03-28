@@ -86,12 +86,12 @@
 
       <dt>ニックネーム</dt>
       <dd>
-        <?php echo htmlspecialchars($_SESSION['join']['nick_name'], ENT_QUOTES, 'UTF-8'); ?>
+        <?php echo h($_SESSION['join']['nick_name']); ?>
       </dd>
 
       <dt>メールアドレス</dt>
       <dd>
-        <?php echo htmlspecialchars($_SESSION['join']['email'], ENT_QUOTES, 'UTF-8'); ?>
+        <?php echo h($_SESSION['join']['email']); ?>
       </dd>
 
       <dt>パスワード</dt>
@@ -101,7 +101,7 @@
 
       <dt>写真</dt>
       <dd>
-        <img src="../member_picture/<?php echo htmlspecialchars($_SESSION["join"]["image"], ENT_QUOTES, 'UTF-8'); ?>" width="100" height="100">
+        <img src="../member_picture/<?php echo h($_SESSION["join"]["image"]); ?>" width="100" height="100">
       </dd>
 
     </dl>

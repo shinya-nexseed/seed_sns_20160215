@@ -7,7 +7,7 @@
     // サニタイズのテスト
     // echo '<h1>ほげほげ</h1>'; // ← デカ文字で表示されます。
     // $str = '<h1>ほげほげ</h1>';
-    // echo htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+    // echo h($str);
 
     // バリデーションエラーがあった際に
     // そのエラーを蓄えるための配列を用意
@@ -158,7 +158,7 @@
       <dt>ニックネーム <span class="required">必須</span></dt>
       <dd>
         <?php if(!empty($_POST['nick_name'])): ?>
-            <input type="text" name="nick_name" value="<?php echo htmlspecialchars($_POST['nick_name'], ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="text" name="nick_name" value="<?php echo h($_POST['nick_name']); ?>">
         <?php else: ?>
             <input type="text" name="nick_name" value="">
         <?php endif; ?>
@@ -174,7 +174,7 @@
       <dt>メールアドレス <span class="required">必須</span></dt>
       <dd>
         <?php if(!empty($_POST['email'])): ?>
-            <input type="email" name="email" value="<?php echo htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="email" name="email" value="<?php echo h($_POST['email']); ?>">
         <?php else: ?>
             <input type="email" name="email" value="">
         <?php endif; ?>
