@@ -10,7 +10,7 @@
     // echo $str2;
 
     function makeLink($value) {
-        return mb_ereg_replace("(https?)(://[[:alnum:]\+\$\;\?\.%,!#~*/:@&=_-]+)",'<a href="\1\2">\1\2</a>', $value);
+        return mb_ereg_replace("(https?)(://[[:alnum:]\+\$\;\?\.%,!#~*/:@&=_-]+)",'<a href="\1\2" target="_blank">\1\2</a>', $value);
     }
 
     // $_SESSIONに必要な値が入っていればログインしているので、
@@ -50,6 +50,56 @@
     }
 
     // 投稿を取得する
+    if (isset($_REQUEST['page'])) {
+        // index.php?page=1 → $pageには1が入る
+        // index.php?page=  → $pageには''が入る
+        $page = $_REQUEST['page'];
+    } else {
+        // index.php → $pageには1が入る
+        $page = 1;
+    }
+    
+
+    if ($page == '') {
+        // index.php?page=  → $pageには1が入る
+        $page = 1;
+    }
+
+    // max()関数
+    // 与えられたデータの中から一番大きな値を返す
+    // index.php?page=0.4
+    $page = max($page,1);
+
+    
+    // 最終ページを取得する
+    $sql = 'SELECT COUNT(*) AS cnt FROM tweets';
+    $recordSet = mysqli_query($db,$sql);
+    // $table['cnt'] = データの件数;
+    $table = mysqli_fetch_assoc($recordSet);
+
+    // 1ページに5件のツイートデータを表示し、それ以上のデータは次のページで
+    // 表示するような実装にする
+
+    // 最大で何ページ分のツイートデータがあるのかを取得
+    // ツイートデータが7件だった場合、必要な最大ページ数は2ページです。
+
+    // ceil()関数
+    // 指定した少数を切り上げる
+
+    // 5件のデータで1ページ分なので、取得したツイート件数をまずは5で割る
+    $maxPage = ceil($table['cnt'] / 5);
+
+    // min()関数
+    // 与えられたデータの中から一番小さな値を返す
+    $page = min($page, $maxPage);
+
+    // SELECT文開始の基準となる数字を格納する$startを用意
+    // 1ページ目なら0、2ページ目なら5という数値が入る
+    $start = ($page - 1) * 5;
+    // 結果がマイナスになるようであれば1ページ目を表す0を$startに格納
+    $start = max(0, $start);
+
+
     // $sql = sprintf('SELECT m.nick_name, m.picture_path, p.* FROM members m, tweets p WHERE m.member_id=p.member_id ORDER BY p.created DESC');
 
     // membersテーブルからmember_idが1のレコードを取得する
@@ -64,10 +114,12 @@
     // membersテーブルのmember_idと,
     // tweetsテーブルのmember_idが等しければ
     // データを取得する (存在するtweetsデータ全件取得)
-    $sql = 'SELECT m.nick_name, m.picture_path, t.*
+    $sql = sprintf('SELECT m.nick_name, m.picture_path, t.*
             FROM members m, tweets t 
             WHERE m.member_id=t.member_id
-            ORDER BY t.created DESC';
+            ORDER BY t.created DESC LIMIT %d, 5',
+            $start
+            );
 
 
     $tweets = mysqli_query($db,$sql) or die(mysqli_error($db));
@@ -165,6 +217,20 @@
           </div>
       <?php endwhile; ?>
 
+      <!-- ページング用のボタン設置 -->
+      <ul class="paging">
+        <?php if ($page > 1) { ?>
+            <li><a href="index.php?page=<?php print($page - 1); ?>">前のページ</a></li>
+        <?php } else { ?>
+            <li>前のページ</li>
+        <?php } ?>
+
+        <?php if ($page < $maxPage) { ?>
+            <li><a href="index.php?page=<?php print($page + 1); ?>">次のページ</a></li>
+        <?php } else { ?>
+            <li>次のページ</li>
+        <?php } ?>
+      </ul>
     </div>
   </div>
 </body>
