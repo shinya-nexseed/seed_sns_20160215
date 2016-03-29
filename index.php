@@ -49,11 +49,21 @@
         }
     }
 
+    // 変数確認用
+    function special_echo($value) {
+        echo $value;
+        echo '<br>';
+    }
+
     // 投稿を取得する
     if (isset($_REQUEST['page'])) {
         // index.php?page=1 → $pageには1が入る
         // index.php?page=  → $pageには''が入る
         $page = $_REQUEST['page'];
+        echo '$page1 = ';
+        special_echo($page);
+        echo '$_REQUEST = ';
+        special_echo($_REQUEST['page']);
     } else {
         // index.php → $pageには1が入る
         $page = 1;
@@ -69,7 +79,8 @@
     // 与えられたデータの中から一番大きな値を返す
     // index.php?page=0.4
     $page = max($page,1);
-
+    echo '$page2 = ';
+    special_echo($page);
     
     // 最終ページを取得する
     $sql = 'SELECT COUNT(*) AS cnt FROM tweets';
@@ -88,16 +99,27 @@
 
     // 5件のデータで1ページ分なので、取得したツイート件数をまずは5で割る
     $maxPage = ceil($table['cnt'] / 5);
+    echo '$table = ';
+    special_echo($table['cnt']);
+    echo '$maxPage = ';
+    special_echo($maxPage);
 
     // min()関数
     // 与えられたデータの中から一番小さな値を返す
     $page = min($page, $maxPage);
+    echo '$page3 = ';
+    special_echo($page);
+
 
     // SELECT文開始の基準となる数字を格納する$startを用意
     // 1ページ目なら0、2ページ目なら5という数値が入る
     $start = ($page - 1) * 5;
+    echo '$start1 = ';
+    special_echo($start);
     // 結果がマイナスになるようであれば1ページ目を表す0を$startに格納
     $start = max(0, $start);
+    echo '$start2 = ';
+    special_echo($start);
 
 
     // $sql = sprintf('SELECT m.nick_name, m.picture_path, p.* FROM members m, tweets p WHERE m.member_id=p.member_id ORDER BY p.created DESC');
