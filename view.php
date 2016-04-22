@@ -11,6 +11,25 @@
         exit();
     }
 
+    // いいね!のロジック実装
+    if (!empty($_POST)) {
+        if ($_POST['like'] === 'like') {
+            // いいね!データの登録
+            $sql = sprintf('INSERT INTO `likes` SET member_id=%d, tweet_id=%d',
+                  $_SESSION['id'],
+                  $_REQUEST['id']
+              );
+            mysqli_query($db, $sql) or die(mysqli_error($db));
+        } else {
+            // いいね!データの削除
+            $sql = sprintf('DELETE FROM `likes` WHERE member_id=%d AND tweet_id=%d',
+                  $_SESSION['id'],
+                  $_REQUEST['id']
+              );
+            mysqli_query($db, $sql) or die(mysqli_error($db));
+        }
+    }
+
     // member_id同士でmembersテーブルとtweetsテーブルを結合し、
     // tweetsのtweet_idとURLパラメータのidの値が一致するデータを
     // createdの新しい順に取得
@@ -22,6 +41,24 @@
         mysqli_real_escape_string($db, $_REQUEST['id'])
     );
     $tweets = mysqli_query($db, $sql) or die(mysqli_error($db));
+
+    // いいね!済みかどうかの判定
+    $sql = sprintf('SELECT * FROM `likes` WHERE member_id=%d AND tweet_id=%d',
+          $_SESSION['id'],
+          $_REQUEST['id']
+      );
+    // $likes変数には、いいね!データがあれば1件、なければ0件のデータが入る
+    $likes = mysqli_query($db, $sql) or die(mysqli_error($db));
+
+    // いいね!データの有無による条件分岐のテスト
+    // if ($like = mysqli_fetch_assoc($likes)) {
+    //     echo 'いいね!済み';
+    //     echo '<br>';
+    // } else {
+    //     echo '未いいね!';
+    //     echo '<br>';
+    // }
+
 ?>
 
 <!DOCTYPE html>
@@ -44,6 +81,27 @@
           <p><?php echo h($tweet['tweet']); ?><span class="name"><?php echo h($tweet['nick_name']);?></span></p>
           <p class="day"><?php echo h($tweet['created']);?></p>
         </div>
+
+        <form action="" method="post">
+
+          <?php if ($like = mysqli_fetch_assoc($likes)): ?>
+          
+              <!-- $_POSTの内容を作る -->
+              <input type="hidden" name="like" value="unlike">
+              <!-- $_POST['like'] = 'like' -->
+              <input type="submit" value="いいね!取り消し">
+
+          <?php else: ?>
+
+              <!-- $_POSTの内容を作る -->
+              <input type="hidden" name="like" value="like">
+              <!-- $_POST['like'] = 'like' -->
+              <input type="submit" value="いいね!">
+
+          <?php endif; ?>
+
+        </form>
+
       <?php else: ?>
         <p>その投稿は削除されたか、URLが間違っています。</p>
       <?php endif; ?>
